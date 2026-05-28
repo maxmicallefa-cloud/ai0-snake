@@ -1,0 +1,535 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .sg-wrap {
+    font-family: 'Syne', sans-serif;
+    background: #0a0a0a;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 24px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sg-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .sg-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .sg-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: #b8ff57;
+    letter-spacing: -1px;
+  }
+
+  .sg-logo span { color: #fff; opacity: 0.4; }
+
+  .sg-stats {
+    display: flex;
+    gap: 16px;
+  }
+
+  .sg-stat {
+    text-align: right;
+  }
+
+  .sg-stat-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .sg-stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .sg-canvas-wrap {
+    position: relative;
+    z-index: 2;
+    border: 1px solid rgba(184,255,87,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(184,255,87,0.08);
+  }
+
+  canvas { display: block; }
+
+  .sg-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,10,0.88);
+    z-index: 10;
+  }
+
+  .sg-overlay-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #b8ff57;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+  }
+
+  .sg-overlay-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 28px;
+  }
+
+  .sg-diff-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .sg-diff-btn {
+    padding: 7px 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .sg-diff-btn.active {
+    border-color: #b8ff57;
+    color: #b8ff57;
+    background: rgba(184,255,87,0.08);
+  }
+
+  .sg-diff-btn:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
+  .sg-diff-btn.active:hover { border-color: #b8ff57; color: #b8ff57; }
+
+  .sg-start-btn {
+    padding: 12px 36px;
+    background: #b8ff57;
+    color: #0a0a0a;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+
+  .sg-start-btn:hover { background: #cbff7a; transform: scale(1.02); }
+  .sg-start-btn:active { transform: scale(0.98); }
+
+  .sg-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 14px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .sg-level-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sg-level-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .sg-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.2s;
+  }
+
+  .sg-dot.active { background: #b8ff57; }
+
+  .sg-level-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+
+  .sg-controls-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.5px;
+  }
+
+  .sg-mobile-controls {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .sg-ctrl-row {
+    display: flex;
+    gap: 4px;
+  }
+
+  .sg-ctrl-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.6);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .sg-ctrl-btn:active { background: rgba(184,255,87,0.15); border-color: #b8ff57; color: #b8ff57; }
+
+  @media (max-width: 480px) {
+    .sg-mobile-controls { display: flex; }
+    .sg-controls-hint { display: none; }
+  }
+
+  .sg-gameover-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 4px;
+  }
+
+  .sg-gameover-big {
+    font-size: 48px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .sg-hi-badge {
+    display: inline-block;
+    background: rgba(184,255,87,0.15);
+    border: 1px solid rgba(184,255,87,0.4);
+    color: #b8ff57;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+</style>
+
+<div class="sg-wrap" id="sgWrap">
+  <div class="sg-grid-bg"></div>
+
+  <div class="sg-header">
+    <div class="sg-logo">SNAKE<span>.AI0</span></div>
+    <div class="sg-stats">
+      <div class="sg-stat">
+        <div class="sg-stat-label">Score</div>
+        <div class="sg-stat-val" id="scoreDisp">0</div>
+      </div>
+      <div class="sg-stat">
+        <div class="sg-stat-label">Best</div>
+        <div class="sg-stat-val" id="bestDisp">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sg-canvas-wrap" id="canvasWrap">
+    <canvas id="snakeCanvas" width="360" height="360"></canvas>
+
+    <div class="sg-overlay" id="overlay">
+      <div class="sg-overlay-title" id="overlayTitle">SNAKE</div>
+      <div class="sg-overlay-sub" id="overlaySub">choose difficulty</div>
+
+      <div class="sg-diff-row">
+        <button class="sg-diff-btn active" data-diff="easy" onclick="setDiff('easy')">Easy</button>
+        <button class="sg-diff-btn" data-diff="medium" onclick="setDiff('medium')">Medium</button>
+        <button class="sg-diff-btn" data-diff="hard" onclick="setDiff('hard')">Hard</button>
+      </div>
+
+      <div id="hiScoreSection" style="display:none; margin-bottom:16px;">
+        <div class="sg-gameover-score" id="goScoreLabel"></div>
+        <div class="sg-gameover-big" id="goScoreNum"></div>
+        <div class="sg-hi-badge" id="hiBadge" style="display:none">new high score!</div>
+      </div>
+
+      <button class="sg-start-btn" id="startBtn" onclick="startGame()">START GAME</button>
+    </div>
+  </div>
+
+  <div class="sg-bottom">
+    <div class="sg-level-info">
+      <div class="sg-level-dots" id="levelDots"></div>
+      <span class="sg-level-label" id="levelLabel">Level 1</span>
+    </div>
+    <div class="sg-controls-hint">↑ ↓ ← → or WASD</div>
+  </div>
+
+  <div class="sg-mobile-controls">
+    <div class="sg-ctrl-row">
+      <button class="sg-ctrl-btn" onclick="mobileDir(0,-1)">↑</button>
+    </div>
+    <div class="sg-ctrl-row">
+      <button class="sg-ctrl-btn" onclick="mobileDir(-1,0)">←</button>
+      <button class="sg-ctrl-btn" onclick="mobileDir(0,1)">↓</button>
+      <button class="sg-ctrl-btn" onclick="mobileDir(1,0)">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GRID = 18;
+const CELL = 20;
+const W = GRID, H = GRID;
+const canvas = document.getElementById('snakeCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = GRID * CELL;
+canvas.height = GRID * CELL;
+
+const DIFF = {
+  easy:   { speed: 140, scoreMult: 1, levels: [1,3,5,7,9,12,15,20,25,30] },
+  medium: { speed: 95,  scoreMult: 2, levels: [1,3,5,7,9,12,15,20,25,30] },
+  hard:   { speed: 55,  scoreMult: 3, levels: [1,3,5,7,9,12,15,20,25,30] }
+};
+
+let diff = 'easy';
+let snake = [], dir = {x:1,y:0}, nextDir = {x:1,y:0};
+let food = null, score = 0, best = 0, level = 1, foodEaten = 0;
+let running = false, paused = false, gameLoop = null;
+
+function setDiff(d) {
+  diff = d;
+  document.querySelectorAll('.sg-diff-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === d);
+  });
+}
+
+function randPos() {
+  for (let i = 0; i < 200; i++) {
+    const p = { x: Math.floor(Math.random()*W), y: Math.floor(Math.random()*H) };
+    if (!snake.some(s => s.x===p.x && s.y===p.y)) return p;
+  }
+  return { x: 0, y: 0 };
+}
+
+function calcLevel(eaten) {
+  const thresholds = DIFF[diff].levels;
+  let l = 1;
+  for (let i = 0; i < thresholds.length; i++) {
+    if (eaten >= thresholds[i]) l = i + 1;
+  }
+  return Math.min(l, thresholds.length);
+}
+
+function updateLevelUI() {
+  const dots = document.getElementById('levelDots');
+  const total = 10;
+  dots.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'sg-dot' + (i < level ? ' active' : '');
+    dots.appendChild(d);
+  }
+  document.getElementById('levelLabel').textContent = 'Level ' + level;
+}
+
+function startGame() {
+  snake = [{x:9,y:9},{x:8,y:9},{x:7,y:9}];
+  dir = {x:1,y:0};
+  nextDir = {x:1,y:0};
+  score = 0;
+  foodEaten = 0;
+  level = 1;
+  food = randPos();
+  running = true;
+  paused = false;
+
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('scoreDisp').textContent = '0';
+  document.getElementById('hiScoreSection').style.display = 'none';
+  updateLevelUI();
+
+  clearInterval(gameLoop);
+  gameLoop = setInterval(tick, DIFF[diff].speed - (level-1)*4);
+}
+
+function tick() {
+  dir = nextDir;
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+  if (head.x < 0 || head.x >= W || head.y < 0 || head.y >= H ||
+      snake.some(s => s.x === head.x && s.y === head.y)) {
+    endGame(); return;
+  }
+
+  snake.unshift(head);
+
+  if (head.x === food.x && head.y === food.y) {
+    foodEaten++;
+    const pts = 10 * level * DIFF[diff].scoreMult;
+    score += pts;
+    document.getElementById('scoreDisp').textContent = score;
+    food = randPos();
+
+    const newLevel = calcLevel(foodEaten);
+    if (newLevel !== level) {
+      level = newLevel;
+      clearInterval(gameLoop);
+      gameLoop = setInterval(tick, Math.max(30, DIFF[diff].speed - (level-1)*5));
+      updateLevelUI();
+    }
+  } else {
+    snake.pop();
+  }
+
+  draw();
+}
+
+function draw() {
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x <= W; x++) {
+    ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y <= H; y++) {
+    ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(canvas.width,y*CELL); ctx.stroke();
+  }
+
+  snake.forEach((seg, i) => {
+    const alpha = 1 - (i / snake.length) * 0.6;
+    ctx.fillStyle = i === 0 ? '#b8ff57' : `rgba(184,255,87,${alpha})`;
+    const pad = i === 0 ? 1 : 2;
+    ctx.beginPath();
+    ctx.roundRect(seg.x*CELL+pad, seg.y*CELL+pad, CELL-pad*2, CELL-pad*2, i===0?3:2);
+    ctx.fill();
+
+    if (i === 0) {
+      const ex = seg.x*CELL + CELL/2 + (dir.x * 4);
+      const ey = seg.y*CELL + CELL/2 + (dir.y * 4);
+      const eyeOff = dir.x !== 0 ? {x:0,y:3} : {x:3,y:0};
+      ctx.fillStyle = '#0a0a0a';
+      ctx.beginPath(); ctx.arc(ex+eyeOff.x, ey+eyeOff.y, 1.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex-eyeOff.x, ey-eyeOff.y, 1.5, 0, Math.PI*2); ctx.fill();
+    }
+  });
+
+  if (food) {
+    ctx.fillStyle = '#ff5757';
+    ctx.beginPath();
+    ctx.arc(food.x*CELL+CELL/2, food.y*CELL+CELL/2, CELL/2-3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#ff8a8a';
+    ctx.beginPath();
+    ctx.arc(food.x*CELL+CELL/2-2, food.y*CELL+CELL/2-2, 2.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#4caf50';
+    ctx.fillRect(food.x*CELL+CELL/2-1, food.y*CELL+3, 2, 5);
+  }
+}
+
+function endGame() {
+  clearInterval(gameLoop);
+  running = false;
+
+  const isHi = score > best;
+  if (isHi) best = score;
+  document.getElementById('bestDisp').textContent = best;
+
+  const ov = document.getElementById('overlay');
+  ov.style.display = 'flex';
+  document.getElementById('overlayTitle').textContent = 'GAME OVER';
+  document.getElementById('overlaySub').textContent = 'level ' + level + ' · ' + diff;
+  document.getElementById('hiScoreSection').style.display = 'block';
+  document.getElementById('goScoreLabel').textContent = 'your score';
+  document.getElementById('goScoreNum').textContent = score;
+  document.getElementById('hiBadge').style.display = isHi && score > 0 ? 'inline-block' : 'none';
+  document.getElementById('startBtn').textContent = 'PLAY AGAIN';
+
+  draw();
+}
+
+function mobileDir(x, y) {
+  if (!running) return;
+  if (dir.x === -x && dir.y === -y) return;
+  nextDir = {x, y};
+}
+
+document.addEventListener('keydown', e => {
+  if (!running) return;
+  const map = {
+    ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1},
+    ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
+    w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0}
+  };
+  const nd = map[e.key];
+  if (nd && !(nd.x === -dir.x && nd.y === -dir.y)) {
+    nextDir = nd;
+    e.preventDefault();
+  }
+});
+
+updateLevelUI();
+draw();
+ctx.fillStyle = 'rgba(255,255,255,0.0)';
+</script>
